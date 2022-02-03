@@ -3,7 +3,7 @@ import 'package:http/http.dart';
 import 'models.dart';
 
 class HttpService {
-  final Uri gameURL = Uri.parse("http://192.168.2.104:5000/game");
+  final Uri gameURL = Uri.parse("http://127.0.0.1:5000/game");
 
   Future<Game> getGame() async {
     Response res = await get(gameURL);

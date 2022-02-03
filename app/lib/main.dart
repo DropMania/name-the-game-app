@@ -3,6 +3,7 @@ import 'services.dart';
 import 'models.dart';
 import "dart:math";
 import 'utils.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() {
   runApp(const MyApp());
@@ -48,11 +49,30 @@ class _AppState extends State<App> {
   }
 
   void guessGame(String value) {
-    double sim = similarity(value, _game.name);
-    if (sim > 0.5) {
-      print('You win!');
+    List<String> names = [_game.name, ..._game.alternativeNames];
+    bool win = names.any((String name) =>
+        similarity(value.toUpperCase(), _game.name.toUpperCase()) > 0.5);
+    if (win) {
+      Fluttertoast.showToast(
+          msg: "Correct!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0);
       pickGame();
+    } else {
+      Fluttertoast.showToast(
+          msg: "Wrong!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
+    _fieldController.clear();
   }
 
   @override
@@ -68,13 +88,15 @@ class _AppState extends State<App> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: 200,
-              color: Colors.black,
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : Image.network(_game
-                      .screenshots[_random.nextInt(_game.screenshots.length)]),
-            ),
+                height: 200,
+                color: Colors.black,
+                child: Stack(children: [
+                  Image.asset('assets/pickgame.gif'),
+                  _isLoading
+                      ? Container()
+                      : Image.network(_game.screenshots[
+                          _random.nextInt(_game.screenshots.length)]),
+                ])),
             TextFormField(
               controller: _fieldController,
               decoration: const InputDecoration(
@@ -82,7 +104,7 @@ class _AppState extends State<App> {
               ),
               onFieldSubmitted: guessGame,
             ),
-            ElevatedButton(onPressed: pickGame, child: const Text('Pick Game'))
+            ElevatedButton(onPressed: pickGame, child: const Text('Skip Game'))
           ],
         ),
       ),
