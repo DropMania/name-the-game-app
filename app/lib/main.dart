@@ -4,8 +4,10 @@ import 'models.dart';
 import "dart:math";
 import 'utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/services.dart';
 
-void main() {
+Future main() async {
+  // await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MyApp());
 }
 
@@ -104,7 +106,17 @@ class _AppState extends State<App> {
               ),
               onFieldSubmitted: guessGame,
             ),
-            ElevatedButton(onPressed: pickGame, child: const Text('Skip Game'))
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  child: const Text('Guess Game'),
+                  onPressed: () => guessGame(_fieldController.text),
+                ),
+                ElevatedButton(
+                    onPressed: pickGame, child: const Text('Skip Game')),
+              ],
+            )
           ],
         ),
       ),
