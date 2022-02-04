@@ -1,7 +1,11 @@
+import functions from 'firebase-functions'
+import admin from 'firebase-admin'
 import express from 'express'
 import dotenv from 'dotenv'
-import axios from 'axios'
 import fetch from 'node-fetch'
+import axios from 'axios'
+dotenv.config()
+
 const app = express()
 dotenv.config()
 let authToken = 'khbrj2nlxbqyg8ww2n5vhofmnfyvom'
@@ -12,6 +16,7 @@ async function generateAuthToken() {
     )
     authToken = data.access_token
 }
+
 async function pickGame() {
     let offset = Math.floor(Math.random() * 420)
     let response = await fetch(`${BASE_URL}/games`, {
@@ -32,6 +37,12 @@ async function pickGame() {
 }
 //generateAuthToken()
 app.use(express.json())
+app.post('/regenerate_token', async (req, res) => {
+    await generateAuthToken()
+    res.json({
+        msg: 'token regenerated'
+    })
+})
 app.get('/game', async (req, res) => {
     let game = await pickGame()
     while (game.length === 0 || game[0].screenshots.length === 0) {
@@ -54,4 +65,4 @@ app.get('/game', async (req, res) => {
     res.json(game)
 })
 
-app.listen(5000, () => console.log('listening on port 5000'))
+export const api = functions.https.onRequest(app)
