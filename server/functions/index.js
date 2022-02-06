@@ -1,12 +1,11 @@
 import functions from 'firebase-functions'
 import admin from 'firebase-admin'
-import express from 'express'
 import dotenv from 'dotenv'
 import fetch from 'node-fetch'
 import axios from 'axios'
 dotenv.config()
+admin.initializeApp()
 
-const app = express()
 dotenv.config()
 let authToken = 'khbrj2nlxbqyg8ww2n5vhofmnfyvom'
 const BASE_URL = 'https://api.igdb.com/v4'
@@ -35,34 +34,35 @@ async function pickGame() {
     })
     return await response.json()
 }
-//generateAuthToken()
-app.use(express.json())
-app.post('/regenerate_token', async (req, res) => {
+export const regenerate_token = functions.https.onCall(async (req, res) => {
     await generateAuthToken()
     res.json({
         msg: 'token regenerated'
     })
 })
-app.get('/game', async (req, res) => {
-    let game = await pickGame()
-    while (game.length === 0 || game[0].screenshots.length === 0) {
-        game = await pickGame()
+export const game = functions.https.onCall(async (req, res) => {
+    try {
+        let game = await pickGame()
+        while (game.length === 0 || game[0].screenshots.length === 0) {
+            game = await pickGame()
+        }
+        game = game[0]
+        if (game.alternative_names) {
+            game.alternative_names = game.alternative_names.map(
+                (alternative_name) => alternative_name.name
+            )
+        } else {
+            game.alternative_names = ['']
+        }
+        if (game.screenshots) {
+            game.screenshots = game.screenshots.map(
+                (screenshot) =>
+                    'https:' +
+                    screenshot.url.replace('t_thumb', 't_screenshot_med')
+            )
+        }
+        return game
+    } catch (err) {
+        throw new functions.https.HttpsError('internal', err)
     }
-    game = game[0]
-    if (game.alternative_names) {
-        game.alternative_names = game.alternative_names.map(
-            (alternative_name) => alternative_name.name
-        )
-    } else {
-        game.alternative_names = ['']
-    }
-    if (game.screenshots) {
-        game.screenshots = game.screenshots.map(
-            (screenshot) =>
-                'https:' + screenshot.url.replace('t_thumb', 't_screenshot_med')
-        )
-    }
-    res.json(game)
 })
-
-export const api = functions.https.onRequest(app)
