@@ -5,19 +5,30 @@ import '../state.dart';
 import 'input_section.dart';
 import 'score_section.dart';
 
-class GameView extends StatelessWidget {
+class GameView extends StatefulWidget {
   const GameView({Key? key}) : super(key: key);
 
   @override
+  State<GameView> createState() => _GameViewState();
+}
+
+class _GameViewState extends State<GameView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addPostFrameCallback((timestamp) {
+      GameState state = Provider.of<GameState>(context, listen: false);
+      state.startTimer();
+      state.pickGame();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var state = context.watch<GameState>();
-    state.startTimer();
+    GameState state = Provider.of<GameState>(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('NameTheGame'),
-      ),
       body: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(8, 64, 8, 8),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -9,7 +9,7 @@ class InputSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var state = Provider.of<GameState>(context);
+    GameState state = Provider.of<GameState>(context);
     void guessGame() {
       if (state.currentText == '') return;
       List<String> names = [
@@ -17,8 +17,7 @@ class InputSection extends StatelessWidget {
         ...state.currentGame.alternativeNames
       ];
       bool win = names.any((String name) =>
-          similarity(state.currentText.toUpperCase(),
-              state.currentGame.name.toUpperCase()) >
+          similarity(state.currentText.toUpperCase(), name.toUpperCase()) >
           0.5);
       if (win) {
         Fluttertoast.showToast(
@@ -47,14 +46,6 @@ class InputSection extends StatelessWidget {
 
     return Column(
       children: [
-        /*TextFormField(
-          controller: _fieldController,
-          decoration: const InputDecoration(
-            labelText: 'Name the game',
-          ),
-          onFieldSubmitted: guessGame,
-          keyboardType: TextInputType.text,
-        ),*/
         Text(
           state.currentText,
           style: const TextStyle(fontSize: 20),
@@ -83,14 +74,17 @@ class KeyBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     var state = Provider.of<GameState>(context);
     return SizedBox(
-      height: 250,
+      height: 300,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          ElevatedButton(
-              onPressed: state.backLetter,
-              onLongPress: state.clearText,
-              child: const Text('<-')),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              for (var i = 1; i < 10; i++) KeyButton(text: i.toString()),
+              const KeyButton(text: '0'),
+            ],
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: const [
@@ -132,6 +126,23 @@ class KeyBoard extends StatelessWidget {
               KeyButton(text: 'M'),
             ],
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () => state.addLetter('-'),
+                child: const Text('-'),
+              ),
+              ElevatedButton(
+                onPressed: () => state.addLetter(' '),
+                child: const Text(' '),
+              ),
+              ElevatedButton(
+                  onPressed: state.backLetter,
+                  onLongPress: state.clearText,
+                  child: const Text('<-')),
+            ],
+          ),
         ],
       ),
     );
@@ -146,13 +157,19 @@ class KeyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     var state = Provider.of<GameState>(context);
     return SizedBox(
-      height: 65,
+      height: 60,
       width: 36,
       child: ElevatedButton(
-        onPressed: () => state.setLetter(text),
+        onPressed: () => state.addLetter(text),
         style: ButtonStyle(
           padding: MaterialStateProperty.all<EdgeInsets>(
-            const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
+            const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+          ),
+          side: MaterialStateProperty.all<BorderSide>(
+            const BorderSide(
+              color: Colors.black,
+              width: 3,
+            ),
           ),
         ),
         child: Text(

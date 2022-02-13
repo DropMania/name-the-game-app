@@ -31,6 +31,9 @@ var appTheme = ThemeData(
     headline2: GoogleFonts.paytoneOne(
       fontSize: 40,
     ),
+    headline3: GoogleFonts.paytoneOne(
+      fontSize: 30,
+    ),
     bodyText1: GoogleFonts.paytoneOne(),
     button: GoogleFonts.paytoneOne(
         textStyle: const TextStyle(decorationThickness: 5, fontSize: 20)),

@@ -13,7 +13,7 @@ class ScoreSection extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: 20,
+          height: 15,
           child: LinearProgressIndicator(
             value: state.timeLeft / state.maxTime,
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
@@ -27,8 +27,8 @@ class ScoreSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15),
                 color: Colors.red),
             child: Text(
-              'Score: ${state.score}',
-              style: Theme.of(context).textTheme.headline2,
+              'SCORE: ${state.score}', 
+              style: Theme.of(context).textTheme.headline3,
             ),
           ),
         ),

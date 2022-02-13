@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'firebase.dart';
 import 'models.dart';
 import 'dart:math';
-import 'dart:async';
+import 'package:pausable_timer/pausable_timer.dart';
 
 class GameState extends ChangeNotifier {
   late Game currentGame;
@@ -17,34 +17,40 @@ class GameState extends ChangeNotifier {
   int timeLeft = 60;
   int timeLeftIncrease = 5;
   final _random = Random();
-  late Timer timer = Timer(const Duration(seconds: 0), () {});
+  late final PausableTimer _timer =
+      PausableTimer(const Duration(seconds: 1), timerTick);
 
-  startTimer() {
-    if (timer.isActive) {
-      timer.cancel();
-    }
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (timeLeft > 0) {
-        timeLeft--;
-        notifyListeners();
-      } else {
-        timer.cancel();
-      }
-    });
+  /// starts the timer
+  void startTimer() {
+    _timer.start();
   }
 
-  pickGame() async {
+  void timerTick() {
+    if (timeLeft > 0) {
+      timeLeft--;
+      _timer
+        ..reset()
+        ..start();
+      notifyListeners();
+    }
+  }
+
+  /// picks a random game from igdb
+  void pickGame() async {
     isLoading = true;
+    _timer.pause();
     notifyListeners();
     currentGame = await FBFunctions.getGame();
     playedGames.add(currentGame);
     currentScreenshot = currentGame
         .screenshots[_random.nextInt(currentGame.screenshots.length)];
     isLoading = false;
+    _timer.start();
     notifyListeners();
   }
 
-  increaseScore() {
+  /// increases the score by the [scoreIncrease]
+  void increaseScore() {
     score += scoreIncrease;
     if (score > highScore) {
       highScore = score;
@@ -52,7 +58,8 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  changeTime(int time) {
+  /// changes the time left by the given amount
+  void changeTime(int time) {
     timeLeft += time;
     if (timeLeft > maxTime) {
       timeLeft = maxTime;
@@ -60,7 +67,8 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  increaseTime() {
+  /// increases the time left by [timeLeftIncrease] seconds.
+  void increaseTime() {
     timeLeft += timeLeftIncrease;
     if (timeLeft > maxTime) {
       timeLeft = maxTime;
@@ -68,18 +76,21 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  setLetter(String letter) {
+  /// adds the string to the current game's text
+  void addLetter(String letter) {
     currentText += letter;
     notifyListeners();
   }
 
-  backLetter() {
+  /// removes the last letter from the current game's text
+  void backLetter() {
     if (currentText.isEmpty) return;
     currentText = currentText.substring(0, currentText.length - 1);
     notifyListeners();
   }
 
-  clearText() {
+  /// clears the current game's text
+  void clearText() {
     currentText = '';
     notifyListeners();
   }
